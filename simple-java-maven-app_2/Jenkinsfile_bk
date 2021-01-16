@@ -1,0 +1,53 @@
+pipeline{
+    agent any
+    stages{
+	
+	stage('checkout code'){
+            steps{
+		git branch: 'master',
+                credentialsId: 'git_abdelrahman_user',
+                url: 'http://git:80/jenkins/maven.git'
+        sh 'ls -la'
+            }
+        }
+        stage("Bulid"){
+            steps{
+                sh '''
+
+		docker run --rm -w "/app" -v "$(pwd):/app" -v "/root/.m2:/root/.m2" maven:3-alpine mvn -B -DskipTests clean package
+
+                docker build -t "simple_maven_app:$BUILD_NUMBER" .
+                
+                
+                '''
+            }
+        } 
+        stage("Test"){
+            steps{
+                 echo "Testing ......."
+                 sh '''
+                 docker run --rm  -w "/app" -v "$(pwd):/app" -v "/root/.m2:/root/.m2" maven:3-alpine mvn test
+                 '''
+            }
+        }
+        stage("Deploy"){
+            steps{
+                echo "Deploying ......."
+            }
+        }
+    }
+    post{
+        always{
+            echo "========always========"
+        }
+        success{
+            echo "========pipeline executed successfully ========"
+        }
+        failure{
+            echo "========pipeline execution failed========"
+        }
+        unstable{
+            echo "========excuted when unstable========"
+        }
+    }
+}

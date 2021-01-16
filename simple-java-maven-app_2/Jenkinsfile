@@ -1,0 +1,75 @@
+pipeline{
+    agent any
+    
+    environment{
+        DOCKER_USERNAME = credentials('DOCKER_USERNAME')
+        DOCKER_PASSWORD = credentials('DOCKER_PASSWORD')
+    }
+    stages{
+
+
+        /* stage('checkout code'){
+            steps{
+		git branch: 'master',
+                credentialsId: 'git_abdelrahman_user',
+                url: 'http://git:80/jenkins/maven.git'
+        sh 'ls -la'
+            }
+        } */
+
+        stage("Bulid"){
+            steps{
+                sh '''
+
+		        docker run --rm -w "/app" -v "$(pwd):/app" -v "/root/.m2:/root/.m2" maven:3-alpine mvn -B -DskipTests clean package
+                docker build -t "abdelrahman1993/maven-app:$BUILD_NUMBER" .
+                
+                '''
+            }
+        } 
+        stage("Test"){
+            steps{
+                 echo "Testing ......."
+                 sh '''
+                 docker run --rm  -w "/app" -v "$(pwd):/app" -v "/root/.m2:/root/.m2" maven:3-alpine mvn test
+                 '''
+            }
+        }
+        stage("Push"){
+            steps{
+                echo "pushing to dockerHUB ......."
+                sh '''
+                docker login -u abdelrahman1993 -p $DOCKER_PASSWORD
+                docker push "abdelrahman1993/maven-app:$BUILD_NUMBER"
+                '''
+            }
+        }
+
+        stage("Deploy"){
+            steps{
+                echo "Deploying ......."
+                sh '''
+                sed -i -e "s/BUILD_NUMBER/$BUILD_NUMBER/g" docker-compose.yml
+                scp -i /tmp/remote_key docker-compose.yml abdo@192.168.40.1:/tmp/docker-compose.yml
+                ssh -i /tmp/remote_key abdo@192.168.40.1 "docker login -u abdelrahman1993 -p $DOCKER_PASSWORD"
+                ssh -i /tmp/remote_key abdo@192.168.40.1 "cd /tmp ; docker-compose build ; docker-compose up -d"
+                '''
+            }
+        }
+    }
+    post{
+        always{
+            echo "========always========"
+        }
+        success{
+            echo "========pipeline executed successfully ========"
+        }
+        failure{
+            echo "========pipeline execution failed========"
+        }
+        unstable{
+            echo "========excuted when unstable========"
+        }
+    }
+}
+
