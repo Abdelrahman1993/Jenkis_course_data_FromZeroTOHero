@@ -1,0 +1,83 @@
+pipeline{
+    agent any
+
+    environment{
+        NAME = "Abdelrahman"
+        LASTNAME = "Ahmed"
+        SECRET_TEXT = credentials('SECRET_ID')
+    }
+    tools{
+
+        maven "maven-2.2"
+    }
+    stages{
+
+        stage('test_maven'){
+            steps{
+                sh '''
+                    echo "PATH = ${PATH}"
+                    echo "M2_HOME = ${M2_HOME}"
+                '''
+                
+                sh 'mvn --version'
+            }
+        }
+        stage("test_groovy_script"){
+            steps{
+                script{
+                    if (isUnix()) 
+                    {
+                        sh 'echo hello if unix'
+                    }
+                    else
+                    {
+                        bat 'dir'
+                    }
+                }
+            }
+        }
+        stage("Test environment"){
+            steps{
+                sh '''
+                    echo "name is $NAME"
+                    echo "lastName is $LASTNAME"
+                    echo "secret = $SECRET_TEXT"
+                '''
+            }
+        } 
+        stage("Bulid"){
+            steps{
+                echo "Building ......."
+            }
+        } 
+        stage("Test"){
+            steps{
+                 echo "Testing ......."
+                 sh '''
+                    echo "I can do multiple steps also"
+                    ls -la
+                 '''
+            }
+        }
+        stage("Deploy"){
+            steps{
+                echo "Deploying ......."
+                sh "git --version"
+            }
+        }
+    }
+    post{
+        always{
+            echo "========always========"
+        }
+        success{
+            echo "========pipeline executed successfully ========"
+        }
+        failure{
+            echo "========pipeline execution failed========"
+        }
+        unstable{
+            echo "========excuted when unstable========"
+        }
+    }
+}

@@ -1,0 +1,28 @@
+pipeline{
+
+    agent any
+    
+    stages{
+        stage("Bulid"){
+            steps{
+                echo "Building ......."
+            }
+        } 
+        stage("Test"){
+            steps{
+                 echo "Testing ......."
+                 sh '''
+                    echo "I can do multiple steps also"
+                    ls
+                 '''
+            }
+        }
+        stage("Deploy"){
+            steps{
+                echo "Deploying ......."
+                sh 'ls -la'
+                sh "git --version"
+            }
+        }
+    }
+}

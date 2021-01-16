@@ -1,0 +1,4 @@
+- hosts: test1
+  tasks: 
+    - name: "test echo from shell module"
+      shell: echo "hello world from ansible" > /tmp/ansible_file
