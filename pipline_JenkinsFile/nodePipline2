@@ -1,0 +1,23 @@
+pipeline {
+  agent any
+
+  tools {nodejs "node6"}
+
+  stages {    
+    stage('Cloning Git') {
+      steps {
+        echo "ffffff"
+      }
+    }        
+    stage('Install dependencies') {
+      steps {
+        sh 'npm --version'
+      }
+    }     
+    stage('Test') {
+      steps {
+         sh 'node --version'
+      }
+    }             
+  }
+}

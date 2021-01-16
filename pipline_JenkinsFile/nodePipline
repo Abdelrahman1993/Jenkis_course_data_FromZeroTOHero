@@ -1,0 +1,23 @@
+pipeline {
+  agent any
+  stages {    
+    stage('Cloning Git') {
+      steps {
+        nodejs(nodeJSInstallationName: 'node6') {
+        sh 'npm -v'  //substitute with your code
+        sh 'node -v'
+        }
+      }
+    }        
+    stage('Install dependencies') {
+      steps {
+        echo 'dddddddd'
+      }
+    }     
+    stage('Test') {
+      steps {
+         echo 'ssssssss'
+      }
+    }             
+  }
+}
